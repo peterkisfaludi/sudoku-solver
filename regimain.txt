@@ -1,0 +1,208 @@
+/*
+a pontos idõ 22:34, de már jó ideje mûködik a program
+a részek és egészek csak akkor másolhatók, ha tudod, mire valók
+ezt az algoritmust a metrón és a villamoson találtam ki oda vissza az egyetemrõl
+bizonyítottan mûködik, mert eddig még mindig mûködött (n+1). esetben lehet h beáll nem tudom
+nyugodtan kérdezz ha vmi nem érthetõ, progon bent leszek holnap
+Üdv:Kisfaludi Péter
+*/
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+//szóval...
+//e jelentése érték
+//w jelentése írhatóság
+typedef struct t{
+	int e;
+	int w;
+}kocka,*pk;
+//felhasznált lépések (azé long mert tipikusan 32000-nél nagyobb
+long int stp;
+//kirajzoló, bonyolult:)
+void rajz(pk);
+//olyan értelemben jó, hogy elvileg be lehet-e írni
+int jo(pk,int);
+//sort, oszlopot, négyzetet ellenõrzõ függvény
+int sell(pk,int);
+int oell(pk,int);
+int nell(pk,int);
+
+void main(void) {
+	//a térkép olyan struktokból áll, amiknek van értéke meg írhatósága
+	pk map;
+	//ez idáig megy?
+	int lehetetlen=0,kesz=0;
+	//találó nevû változók a ciklusokhoz
+	int i;
+	int p;
+	//nemá kézzel pötyögjem ide hogy map[20][25]=2  meg így egyszerûbb
+	FILE *fp;
+	int a,b,c;
+	//ez magyarázatra szorul szegény
+	//a map nem kétdimenziós tömb, hanem egy.
+	//miért?
+	//így könnyebb az elõzõ ill következõre lépkedés(tudod, amit 2Dben nem tudtam tegnap megoldani)
+	//tehát az indexek 0 tól 80 ig futnak
+	//minden sorszám/9 megadja az y-t
+	//minden sorszám%9 megadja az oszlopot,
+
+	//matematikai kitérõ:
+	//tehát a leképzés bijektív->létezik inverz fv
+	//->létezik átváltás (majd késõbb a nell fv-ben bebüntet)
+	//a 2Ds tömb számossága <=Alef0, mert 81 elemû
+	//a 2Ds tömb akkor invertálható, ha töltesz bele elemket, különben csupa 0
+	//kitérõ vége
+
+	//lerajzolni hogy megértsd(ha most is érted, max tiszteletem):
+	//leírod sorban 0-8, új sorban 0 alól kezdve 9-18
+	//...
+	//utolsó sorban elsõ elem 72,utolsó 80 lesz  
+
+	map=(pk)malloc(sizeof(kocka)*9*9);
+	//feltoltes
+	//mindenkit 0 ra írhatóra tesz
+	for(i=0;i<81;i++) {
+		map[i].e=0;
+		map[i].w=1;
+	}
+	//aki a fileból jön, nem írható
+	fp=fopen("map.dat","r");
+	while(fscanf(fp,"%d%d%d",&a,&b,&c)==3) {
+		map[b*9+a].e=c;
+		map[b*9+a].w=0;
+	}
+	//itt ellenõrzöd, hogy az-e amit kitölteni akarsz
+	rajz(map);
+	printf("\nnyomj gombot, ha mehet!");
+	//ez a getkar csak várakoztat, ne érdekeljen
+	getchar();
+	//kitöltés
+	//a p az egy cucc, amivel rohangál az indexek között
+	p=0; 
+	//optimista módon 0 lépés
+	stp=0;
+	//addig megy, amég nem lehetetlen v nincs kész, de úgyis kibrékel belõle, tehát írhatsz while(1)-t is
+	while(!lehetetlen && !kesz) {
+		//növeljük meg, amíg nem lesz jó, de ne 0ról kezdje ellenõrizni
+		do {
+			if(map[p].w==1) map[p].e++;
+			stp++;
+			//Ádám!!!
+			//ha mûködés közben akarod látni a programot, vedd ki a kommentet a rajzol elõl
+			//ekkor akár 20 percig is számol, evil nehézségûnél 60 min 30 sec alatt sem tudta
+			//még csak a felét.
+			//Ha ki van kommentezve, akkor viszont köpi a választ
+
+			//na ez elõl vedd ki a //-t
+			//rajz(map);
+		}while(!jo(map,p));
+		//túlpörgött, tehát abba a pozícióba semmit nem lehet tenni
+		if(map[p].e==10) {
+			map[p].e=0;
+			//visszalép
+			do {
+				p--;
+				//ha kiszaladt az elsõ mezõn is, gáz van
+				if(p<0) {lehetetlen=1;break;}
+			}while(map[p].w!=1);//azt nézi, írhatóra megy-e
+			continue;
+		} else {
+			//továbblép
+			do {
+				p++;
+				//ha a 81. mezõ is klappol, akkor hátradõl a programozó és röhög, hogy
+				//a www.websudoku.com evil fokozatát 0 mp alatt solvolja
+				//az tart sokáig, amíg bepötyögöd
+				if(p>80) {kesz=1;break;}
+			}while(map[p].w!=1);
+			continue;
+		}
+
+		
+	}
+	//Óz a nagy varázsló olyat mutat, hogy a kisgyerekek ilyet kérnek Karira
+	//precíz kis space enter tördelt áttekinthetõ táblázat, majdnem excel
+	rajz(map);
+	
+	
+
+}
+
+void rajz(pk a) {
+	
+	int i;
+	//ez itt ANSI szerint duplán javasolt és szabványosított megoldás :)
+	system("cls");
+	//ha elsõ blikkre megérted, ott vagy ahol a part szakad
+	for(i=0;i<81;i++) {
+		printf("%d ",a[i].e);
+		if(i%9==8)printf("\n\n");
+	}
+	printf("\neddig %d lepes telt el",stp);
+}
+//innentõl zárkózz be a szobádba, szigeteld hang, kapcsolj villanyt, húzd el a rolót és
+//KONCENTRÁLJ
+int jo(pk a,int s) {
+	//idáig megy, ha mindegyik jó, akkor visszaadja, hogy jó, ha bármelyik nem stimmel, azt is
+	if((sell(a,s) && oell(a,s) && nell(a,s))==1)return 1;
+	return 0;
+	
+}
+//agyat élesíts!!!
+//legjobb ha lerajzolod, én fejben csináltam a metrón, majdnem elfüstöltem
+int sell(pk a,int s) {
+	int i,elso;
+	//s a sorszám, azt 9-el osztva és 9-el megszorozva megkapod a sor elején álló elemet
+	elso=s/9*9;
+	//ez egészosztás, tehát nehogy letöröld mert X/9*9=X mert nem annyi 9 bõl 8szor
+	for(i=elso;i<elso+9;i++) {
+		//ne magával vizsgálja, mert akkor sosem lesz jó
+		if(i==s)continue;
+		//ha vki ugyanaz a sorban, mint a vizsgált, hamisat ad vissza
+		if(a[s].e==a[i].e)return 0;
+	}
+	return 1;
+}
+//hasonlít, de nem
+int oell (pk a, int s) {
+	int elso,i;
+	//a  mod 9 a 9s maradék, ez a sor legtetején állók sorszáma
+	elso=s%9;
+	//tehát 9esével ugrál lefelé
+	//tényleg rajzold le, meglátod, egyszerûbb
+	//pl a 4-es alatt áll a 4+9=13, az alatt a 13+9=22
+	for(i=elso;i<=elso+9*8;i+=9) {
+		//fut egészen a legfölsõ+72-ig (a 72-t rajzon meglátod simán, de mondhatod, hogy
+		//8-al van alatta az utolsó és minden leugrás 9-et jelent sorszámilag
+		if(i==s)continue;
+		if(a[s].e==a[i].e)return 0;
+	}
+	return 1;
+}
+//Álmaink netovábbja, a mod mûvelet és X*9/9*3/3 együttes használata
+//komoly metróablakonkibámulási idõt emésztett fel a megalkotása
+//mûködik viszont
+int nell(pk a, int s) {
+	//kicsit több a változó
+	int x,y,fs,i;
+	//Pohl biztos egy mutatónövelés mellékhatásaként számolná ki, én meg ilyen vagyok
+	//fs=fölsõ sarok.Az a sorszám, amelyik a 3*3as négyzeten belül a bal fölsõ
+	//az össszeg elsõ része a négyzeten belüli legfölsõ sor elsõ eleme
+	//a második rész a jobbra lépkedés a bal fölsõ sarkáig a négyzetnek
+	fs=s/9/3*3*9+(s%9)/3*3;
+	for(x=fs;x<fs+3;x++) {
+		for(y=0;y<3;y++) {
+			//úgy vizsgál, hogy lépeget a sorban, közben lefelé megnéz 3-at
+			//az i pedig a kérdéses sorszám
+			i=x+y*9;
+			if(i==s)continue;
+			if(a[s].e==a[i].e)return 0;
+		}
+	}
+	return 1;
+}
+
+
+
+
+
