@@ -1,0 +1,107 @@
+<html>
+<head>
+<title>sudoku megoldo</title>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+</head>
+
+<body bgcolor="#FFFFFF" text="#000000">
+<script type="text/javascript"><!--
+google_ad_client = "pub-6732170194623080";
+google_ad_width = 728;
+google_ad_height = 15;
+google_ad_format = "728x15_0ads_al_s";
+//2007-07-27: moviez
+google_ad_channel = "7452089279";
+//-->
+</script>
+<script type="text/javascript"
+  src="http://pagead2.googlesyndication.com/pagead/show_ads.js">
+</script>
+<p><font size="6">Sudoku megold&oacute; algoritmus (by Kisfaludi Péter 2005.12.08 22:34)</font></p>
+<font size="4">
+<br><br>
+A sudoku tábla egy általában 9*9-es négyzetrács, ami fel van osztva 9 db 3*3-as kisebb négyzetre. Kezdetben néhány szám meg van adva, a tábla pedig akkor van helyesen, ha minden mezõben szerepel egy szám, továbbá minden sorban, minden oszlopban, minden kisnégyzetben egy szám csak 1-szer szerepel. A feladat a megoldás során tulajdonképpen az 123456789 számsorozat valamilyen sorrendû elhelyezése minden oszlopban, minden oszlopban és minden kisnégyzetben, a szabályok betartásával.
+<br><br>
+Egy lehetséges megoldás(jobb, mintha minden lehetséges 1-9 sorozatot beírnánk és ellenõriznénk):
+<br>
+0:minden mezõt(az adottak kivételével kitöltünk 0-val
+<br><br>
+1:elindulunk a bal fölsõ sarokból
+<br><br>
+2:folyamatosan jobbra haladunk, a sor végén egy sorral lejjebb folytatjuk a kitöltést
+<br><br>
+3:növeljük az aktuális mezõ értékét 1-el
+<br>megnézünk két fontos esetet is:
+<br>ha az aktuális mezõ a bal fölsõ sarok elõtti mezõ lenne, a kitöltés lehetlen, kilépünk.
+<br>ha az aktuális mezõ a jobb alsó sarok utáni mezõ lenne, a kitöltés sikeres volt, kilépünk.
+<br><br>
+4:ellenõrizzük, hogy az aktuálisan beírt számokkal van-e elvi ütközés (tehát van-e a sorában, oszlopában, kisnégyzetében vele azonos számjegy)
+<br><br>
+	4.1:ha van, 3-as pontnál folytatjuk az algoritmust
+<br>
+	4.2:ha nincs, 5-ös pontra ugrunk
+<br><br>
+5:ellenõrizni kell, hogy az aktuális mezõ értéke 10-e (ez akkor következik be, ha már 1tõl9ig minden számot beírtunk, és egyik sem stimmelt, ekkor a növelés hatására a mezõ értéke 10 lesz, ami viszont már helyesnek fog tûnni az ellenõrzések során, hiszen sehová nem írhattunk 10est)
+<br><br>
+	5.1:ha 10-est írtunk a mezõbe, átállítjuk 0-ra, a vizsgálandó mezõt a haldási iránnyal ellentétesen megkeressük (magyarul visszalépünk az elõzõ írható mezõre balra ill ha kell fölfelé), 3-as pontban folytatjuk az algoritmust
+<br>
+	5.2:ha nem 10-est írtunk, akkor a beírt érték elvileg helyes(tehát akár az is lehet, majd kiderül), megkeressük a következõ mezõt a 2. pontban leírt haladási iránynak megfelõen elõrefelé(tehát ha nem sor végén állunk, a legközelebbi jobbra lévõ írható mezõn folytatjuk, a sor végén egy sort lemegyünk, ott pedig megint jobbra megyünk, amíg nem találunk írható mezõt), 3-as pontban folytatjuk az algoritmust
+<br><br><br>
+<font size="5">
+tömören:<br><br>
+</font>
+<PRE>
+amíg elvileg nem jó az aktuális mezõ értéke
+	aktuális mezõ növelése
+	továbblép a feltételekre
+ha az értéke 10
+	lenulláz
+	elõzõ mezõre lép
+	ha az elõzõ mezõ nem létezik
+		lehetetlen, kilép
+ha nem
+	következõ mezõre lép
+	ha a következõ nem létezik
+		kész, kilép
+</PRE>
+<br>
+<A HREF="sudoku.zip">itt van egy C implementáció</A>(MS Visual Studio 6.0 val készült, de talán Borlandba is befordul)<br>
+tükrözések:
+<A HREF="http://batu.host.sk/sudoku.zip">mirror1</a>
+<A Href="http://www.tar.hu/batu-khan2002/sudoku.zip">mirror2</A>
+<br><br>
+<font size="5">kis segítség a program megértéséhez:</font>
+<br><br>
+a program a táblát nem 2 dimenziós tömbként (más néven mátrix, magyarul táblázat), hanem egydimenziós listaként kezeli, ebben a listában a sorszámok tárolódnak, illetve az, hogy melyik mezõ írható.Tehát a lista egy eleme tartalmazza azt, hogy írható-e (nem volt elõre megadva), illetve tartalmazza a mezõ értékét (ami a beírt szám, például 5).A mezõ sorszáma megegyezik a listabeli sorszámával. A lista sorszámai a sudoku táblába írva:<br>
+<IMG SRC="http://www.tar.hu/kissfa/sorsz.jpg"><br>
+a sorszámokat koordinátákká elég egyszerû képlet szerint lehet átváltani:<br>
+sorszám egészosztva 9-el(s/9, a tizedesjegyek levágásával) megegyezik az y koordinátával<br>
+sorszám 9-el vett maradéka (sorszám mod 9, s%9) megegyezik az x koordinátával<br>
+(megjegyzés: a koordinátarendszert célszerû úgy felvenni, hogy az origó a bal felsõ sarok, az y tengely lefelé mutat, a beosztás 0 tól 8 ig halad)<br>
+tehát x=s%9, y=s/9<br>
+a mezõk közti lépkedés a listában sokkal egyszerûbb, mint a koordinátarendszerben, mert nem kell foglalkozni azzal, hogy sor végén vagyunk-e vagy sor elején, hanem a vizsgált mezõ egyszerûen a lista +-1-edik eleme lesz.<br><br>
+egy sor végigellenõrzése:úgy történik, hogy megállapítjuk a sor elsõ elemét, majd egyesével jobbra lépkedve összehasonlítjuk a mezõk tartalmát az összehasonlítandó elemmel (arra kell csak figyelni, hogy saját magával ne hasonlítsunk, mert akkor semmilyen eredményt nem fog jónak találni és "beragad az ellenõrzés, ez pedig nem cél)<br>képlettel:<br>
+elsõ elem=sorszám/9<br>
+utolsó elem=elsõ elem+8<br><br>
+egy oszlopot úgy lehet végigellenõrizni, hogy megállapítjuk az oszlop legtetején álló elemet, majd 9esével lépkedünk a sorszámokon. A lista és a koordinátarendszer kapcsolata miatt a koordinátarendszerben y=1 távolságra lévõ elemek a listában 9re vannak egymástól. Az ellenõrzést egészen a sor alján található elemig kell végezni.<br>képlettel:<br>
+elsõ elem=sorszám mod 9<br>
+utolsó elem=elsõ elem+8*9=elsõ elem+72<br><br>
+eg kisnégyzet végigellenõrzése:<br>
+megállapítjuk a kisnégyzet bal fölsõ sarkában álló elemet
+ettõl az elemtõl indulva föntrõl le (vagy balról jobbra) megvizsgáljuk az elemeket<br>
+képlettel:<br>
+fölsõ sarok=sorszám/9/3*3*9+(s%9)/3*3
+<br>a képlet magyarázatra szorul: a sorszám/9 a jól ismert egészosztás, visszaadja az y koordinátát.<br>
+ezt osztva 3al megkapjuk, hogy melyik kisnégyzetben van, ha föntrõl lefelé 012 sorrendben van a kisnégyzetek koordinátája.Ez a szám tehát 0, 1 vagy 2 (kisnégyzet y koordinátája)<br>
+visszaszorozva 27-el a 0 oszlop (tehát az elsõ, csak az x koordinátája 0) valamelyik kisnégyzetének a bal felsõ sarkában álló elem sorszámát kapjuk meg (mert ezek 3*9=27-esesével követik egymást ha lefelé megyünk, hasonlóan ahhoz, ahogy a mezõértékek közötti függõleges különbség 9, csak itt már 3*9-esével megyünk) ábrán:<br>
+<IMG SRC="http://www.tar.hu/kissfa/bfkul.jpg"><br>
+ehhez adunk hozzá egy másik értéket, amelyik azt mondja meg, hogy mekkora az x koordináta szerinti eltolás, másképp, hogy milyen sorszámú kisnégyzetben van vízszintesen nézve (012).Tehát ez a hozzáadandó tag úgy jön létre, hogy megállapítjuk a hagyományos x koordinátát (sorszám mod 9, sorszám%9), ezt eloszva 3-al megkapjuk a kisnégyzet x koordinátáját, ami 0, 1 vagy 2 lehet<br>
+ezt a tagot visszaszorozva 3-al megkapunk egy értéket (ami tehát 0, 3 vagy 6 lehet), amit hozzáadva az elsõ oszlopban lévõ már megkapott sorszámhoz, éppen a megfelelõ kisnégyzet bal felsõ elem sorszámát kapjuk meg.ábrán:<br>
+<IMG SRC="http://www.tar.hu/kissfa/bf.jpg"><br>
+<br>
+írta :Kisfaludi Péter ( kissfa@freemail.hu ) <A HREF="http://batu.ini.hu" TARGET="BLANK">http://batu.ini.hu</A><br>
+utoljára frissítve: 2005.12.09<br>
+ötletet, javaslatot, észrevételt, építõ jellegû kritikát, rossz link jelentést, elírásról, hibáról értesítést szívesen fogadok a feltûntetett e-mail címre
+</font>	
+</body>
+</html>
